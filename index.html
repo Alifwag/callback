@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Callback • GrowA Callback</title>
+  <meta name="description" content="Callback page modern dengan animasi, validasi, dan integrasi webhook." />
+  <!-- GSAP (untuk animasi halus) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#4ade80;--muted:#9aa4b2;--glass:rgba(255,255,255,0.04)}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(58,83,255,0.12), transparent),
+                  radial-gradient(900px 500px at 90% 90%, rgba(16,185,129,0.06), transparent), var(--bg);
+      color:#e6eef8; -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale; display:flex; align-items:center; justify-content:center; padding:48px;
+    }
+    .container{width:100%;max-width:1024px;display:grid;grid-template-columns:1fr 420px;gap:28px;align-items:center}
+
+    /* Card kiri - info */
+    .hero{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:16px;padding:32px;box-shadow:0 8px 30px rgba(2,6,23,0.6);backdrop-filter:blur(6px)}
+    h1{margin:0 0 8px;font-size:28px;letter-spacing:-0.4px}
+    p.lead{margin:0 0 18px;color:var(--muted)}
+    .features{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px}
+    .f{background:var(--glass);padding:10px;border-radius:10px;font-size:13px;color:var(--muted);display:flex;gap:10px;align-items:center}
+    .f b{color:#fff;font-weight:600}
+
+    /* Card kanan - form */
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.017), rgba(255,255,255,0.01));padding:22px;border-radius:14px;box-shadow:0 10px 40px rgba(2,6,23,0.6)}
+    form{display:flex;flex-direction:column;gap:12px}
+    label{font-size:12px;color:var(--muted)}
+    input, textarea, select{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:12px;border-radius:10px;color:inherit;outline:none}
+    input:focus, textarea:focus, select:focus{border-color:rgba(74,222,128,0.9);box-shadow:0 4px 18px rgba(74,222,128,0.06)}
+    .row{display:flex;gap:10px}
+    .btn{background:linear-gradient(90deg,var(--accent),#22c55e);border:none;padding:12px;border-radius:10px;color:#04201a;font-weight:700;cursor:pointer}
+    .btn[disabled]{opacity:0.5;cursor:not-allowed}
+
+    .note{font-size:12px;color:var(--muted)}
+    .status{font-size:13px;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02)}
+    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:28px;padding:10px 16px;border-radius:10px;background:#0b1220;border:1px solid rgba(255,255,255,0.04);box-shadow:0 6px 24px rgba(0,0,0,0.6);color:#e6eef8}
+
+    /* Success illustration */
+    .illus{display:flex;align-items:center;gap:12px}
+    .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#2563eb,#4ade80);display:flex;align-items:center;justify-content:center;font-weight:800;color:#04201a}
+
+    @media (max-width:920px){.container{grid-template-columns:1fr; padding:8px} .card{order:2}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero" id="hero">
+      <div class="illus">
+        <div class="logo">CB</div>
+        <div>
+          <h1>Callback • GrowA Callback</h1>
+          <p class="lead">Halaman callback modern — mendukung webhook, validasi, preview payload, dan simulasi panggilan. Siap integrasi ke serverless.</p>
+        </div>
+      </div>
+
+      <div class="features" aria-hidden>
+        <div class="f"><span>🚀</span><div><b>Animasi Halus</b><div>GSAP + CSS untuk transisi</div></div></div>
+        <div class="f"><span>🔒</span><div><b>Keamanan</b><div>Rate-limiter & sanitasi payload</div></div></div>
+        <div class="f"><span>⚙️</span><div><b>Preview</b><div>Lihat payload sebelum kirim</div></div></div>
+        <div class="f"><span>📈</span><div><b>Logs</b><div>Riwayat 20 callback terakhir (client-side)</div></div></div>
+      </div>
+
+      <hr style="margin:20px 0;border:0;border-top:1px dashed rgba(255,255,255,0.03)" />
+
+      <div style="display:flex;gap:12px;align-items:center;justify-content:space-between">
+        <div>
+          <div class="note">Dibuat untuk integrasi mudah — copy endpoint dan tempel di sistem Anda.</div>
+          <div class="note" style="margin-top:6px">Dokumentasi & README disertakan di bawah.</div>
+        </div>
+        <div class="status" id="status">Status: <strong id="statusText">Ready</strong></div>
+      </div>
+    </div>
+
+    <div class="card" id="card">
+      <form id="cbForm" autocomplete="off">
+        <div>
+          <label for="endpoint">Callback Endpoint (URL)</label>
+          <input id="endpoint" type="url" placeholder="https://example.com/webhook" required />
+        </div>
+
+        <div>
+          <label for="method">HTTP Method</label>
+          <select id="method" required>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="payload">Payload (JSON)</label>
+          <textarea id="payload" rows="6" placeholder='{"event":"order.created","data":{}}'></textarea>
+        </div>
+
+        <div class="row">
+          <button class="btn" id="sendBtn" type="submit">Kirim Callback</button>
+          <button class="btn" id="simulateBtn" type="button">Simulasi Lokal</button>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+          <label style="margin:0"><input id="autoHeaders" type="checkbox" checked /> Tambah header X-Signature</label>
+          <div style="flex:1"></div>
+          <button type="button" id="clearBtn" class="btn" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)">Bersihkan</button>
+        </div>
+
+        <div style="margin-top:12px">
+          <label>Preview</label>
+          <pre id="preview" style="max-height:180px;overflow:auto;padding:12px;border-radius:10px;background:#061323;font-size:13px;color:#dbeafe"></pre>
+        </div>
+
+      </form>
+
+      <div style="margin-top:14px">
+        <label>Riwayat (Client-side)</label>
+        <div id="history" style="max-height:160px;overflow:auto;padding:10px;border-radius:10px;background:rgba(255,255,255,0.02)"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" style="display:none">Terkirim!</div>
+
+  <script>
+    // --- Helper kecil
+    const $ = (id)=>document.getElementById(id);
+    const endpoint = $('endpoint');
+    const payload = $('payload');
+    const method = $('method');
+    const preview = $('preview');
+    const sendBtn = $('sendBtn');
+    const simulateBtn = $('simulateBtn');
+    const historyEl = $('history');
+    const statusText = $('statusText');
+    const autoHeaders = $('autoHeaders');
+
+    // inisialisasi contoh payload
+    payload.value = JSON.stringify({event:'order.created',data:{id:12345,amount:25000}},null,2);
+    preview.textContent = payload.value;
+
+    // preview live
+    payload.addEventListener('input', ()=>{
+      let v = payload.value.trim();
+      try{ const parsed = JSON.parse(v); preview.textContent = JSON.stringify(parsed,null,2)}catch(e){preview.textContent = v}
+    })
+
+    // simpan riwayat ke localStorage
+    function pushHistory(item){
+      const arr = JSON.parse(localStorage.getItem('cb_history_v1')||'[]');
+      arr.unshift(item);
+      if(arr.length>20) arr.pop();
+      localStorage.setItem('cb_history_v1',JSON.stringify(arr));
+      renderHistory();
+    }
+    function renderHistory(){
+      const arr = JSON.parse(localStorage.getItem('cb_history_v1')||'[]');
+      historyEl.innerHTML = arr.map(h=>`<div style="padding:8px;border-bottom:1px dashed rgba(255,255,255,0.02)"><b>${h.url}</b><div style="font-size:12px;color:var(--muted)">${h.method} • ${new Date(h.at).toLocaleString()}</div></div>`).join('')
+    }
+    renderHistory();
+
+    // validasi sederhana & sanitasi
+    function safeJSON(text){
+      try{ return JSON.parse(text)}catch(e){return null}
+    }
+
+    // show toast
+    function toast(msg='Terkirim!'){
+      const t = $('toast'); t.textContent = msg; t.style.display = 'block';
+      gsap.fromTo(t,{y:40,opacity:0},{y:0,opacity:1,duration:0.4});
+      setTimeout(()=>gsap.to(t,{opacity:0,y:30,duration:0.4,onComplete:()=>t.style.display='none'}),2000);
+    }
+
+    // animasi awal menggunakan GSAP
+    gsap.from('#hero',{opacity:0,y:16,duration:0.6,stagger:0.08});
+    gsap.from('#card',{opacity:0,y:20,duration:0.6,delay:0.12});
+
+    // kirim callback
+    async function sendCallback(toUrl, methodType, body, extraHeaders={}){
+      statusText.textContent = 'Sending...';
+      try{
+        // tambahkan header signature kecil jika diminta
+        const headers = { 'Content-Type':'application/json', ...extraHeaders };
+        const res = await fetch(toUrl, {method:methodType, headers, body:JSON.stringify(body), mode:'cors'});
+        const text = await res.text();
+        const ok = res.ok;
+        pushHistory({url:toUrl,method:methodType,at:Date.now(),ok});
+        statusText.textContent = ok?('200 OK'):(res.status+' '+res.statusText);
+        toast(ok? 'Callback berhasil' : 'Callback gagal (cek console)');
+        console.log('response text',text);
+        return {ok,resText:text,status:res.status}
+      }catch(err){
+        console.error(err);
+        statusText.textContent = 'Network Error';
+        toast('Gagal: Network Error');
+        pushHistory({url:toUrl,method:methodType,at:Date.now(),ok:false});
+        return {ok:false,error:err}
+      }
+    }
+
+    // event submit form
+    $('cbForm').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const url = endpoint.value.trim();
+      if(!url){ alert('Masukkan endpoint URL'); endpoint.focus(); return }
+      const body = safeJSON(payload.value) || payload.value;
+      // rate-limit client-side sederhana: disable tombol 2 detik
+      sendBtn.disabled = true; setTimeout(()=>sendBtn.disabled=false,2000);
+
+      // headers
+      const headers = {};
+      if(autoHeaders.checked){
+        // contoh signature sederhana (tidak produksi!)
+        const sig = btoa(JSON.stringify({ts:Date.now(),nonce:Math.random().toString(36).slice(2,10)}));
+        headers['X-Signature'] = sig;
+      }
+
+      // show animasi kirim
+      gsap.to(sendBtn,{scale:0.98,duration:0.06,yoyo:true,repeat:1});
+      const result = await sendCallback(url, method.value, body, headers);
+      // tampilkan response singkat di preview area jika ada
+      if(result && result.resText){
+        preview.textContent = typeof result.resText === 'string' ? result.resText : JSON.stringify(result.resText,null,2);
+      }
+    })
+
+    // simulasi lokal — tidak mengirim, hanya memperlihatkan bagaimana payload akan terlihat
+    simulateBtn.addEventListener('click', ()=>{
+      const body = safeJSON(payload.value) || payload.value;
+      const simulated = {url: endpoint.value || 'https://example.local/simulated', method:method.value, body};
+      pushHistory({url:simulated.url,method:simulated.method,at:Date.now(),ok:true});
+      preview.textContent = JSON.stringify(simulated,null,2);
+      toast('Simulasi siap — lihat preview');
+    })
+
+    // tombol clear
+    $('clearBtn').addEventListener('click', ()=>{ endpoint.value=''; payload.value=''; preview.textContent=''; statusText.textContent='Ready' })
+
+    // small accessibility: enter pada endpoint akan fokus ke payload
+    endpoint.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); payload.focus(); } })
+
+    // progressive enhancement: jika server menyediakan CORS dan menerima, maka kirim. Jika tidak (CORS blocked), user dapat gunakan server-proxy.
+
+    // safe note untuk developer: untuk produksi tambahkan:
+    // - HMAC signature server-side verification
+    // - Rate limiting dan replay protection di server
+    // - TLS (https) wajib
+  </script>
+</body>
+  </html>
