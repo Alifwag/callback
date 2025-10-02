@@ -1,254 +1,260 @@
-<!doctype html>
-<html lang="id">
+<!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Callback • GrowA Callback</title>
-  <meta name="description" content="Callback page modern dengan animasi, validasi, dan integrasi webhook." />
-  <!-- GSAP (untuk animasi halus) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ultimate Callback & Webhook Playground</title>
   <style>
-    :root{--bg:#0f1724;--card:#0b1220;--accent:#4ade80;--muted:#9aa4b2;--glass:rgba(255,255,255,0.04)}
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
-      background: radial-gradient(1200px 600px at 10% 10%, rgba(58,83,255,0.12), transparent),
-                  radial-gradient(900px 500px at 90% 90%, rgba(16,185,129,0.06), transparent), var(--bg);
-      color:#e6eef8; -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale; display:flex; align-items:center; justify-content:center; padding:48px;
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #f4f4f4;
+      overflow-x: hidden;
     }
-    .container{width:100%;max-width:1024px;display:grid;grid-template-columns:1fr 420px;gap:28px;align-items:center}
-
-    /* Card kiri - info */
-    .hero{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border-radius:16px;padding:32px;box-shadow:0 8px 30px rgba(2,6,23,0.6);backdrop-filter:blur(6px)}
-    h1{margin:0 0 8px;font-size:28px;letter-spacing:-0.4px}
-    p.lead{margin:0 0 18px;color:var(--muted)}
-    .features{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px}
-    .f{background:var(--glass);padding:10px;border-radius:10px;font-size:13px;color:var(--muted);display:flex;gap:10px;align-items:center}
-    .f b{color:#fff;font-weight:600}
-
-    /* Card kanan - form */
-    .card{background:linear-gradient(180deg, rgba(255,255,255,0.017), rgba(255,255,255,0.01));padding:22px;border-radius:14px;box-shadow:0 10px 40px rgba(2,6,23,0.6)}
-    form{display:flex;flex-direction:column;gap:12px}
-    label{font-size:12px;color:var(--muted)}
-    input, textarea, select{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:12px;border-radius:10px;color:inherit;outline:none}
-    input:focus, textarea:focus, select:focus{border-color:rgba(74,222,128,0.9);box-shadow:0 4px 18px rgba(74,222,128,0.06)}
-    .row{display:flex;gap:10px}
-    .btn{background:linear-gradient(90deg,var(--accent),#22c55e);border:none;padding:12px;border-radius:10px;color:#04201a;font-weight:700;cursor:pointer}
-    .btn[disabled]{opacity:0.5;cursor:not-allowed}
-
-    .note{font-size:12px;color:var(--muted)}
-    .status{font-size:13px;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02)}
-    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:28px;padding:10px 16px;border-radius:10px;background:#0b1220;border:1px solid rgba(255,255,255,0.04);box-shadow:0 6px 24px rgba(0,0,0,0.6);color:#e6eef8}
-
-    /* Success illustration */
-    .illus{display:flex;align-items:center;gap:12px}
-    .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#2563eb,#4ade80);display:flex;align-items:center;justify-content:center;font-weight:800;color:#04201a}
-
-    @media (max-width:920px){.container{grid-template-columns:1fr; padding:8px} .card{order:2}}
+    header {
+      padding: 2rem;
+      text-align: center;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(8px);
+    }
+    header h1 {
+      font-size: 2.8rem;
+      margin-bottom: .5rem;
+      color: #00ffd5;
+    }
+    header p {
+      color: #ddd;
+      font-size: 1.2rem;
+    }
+    main {
+      padding: 2rem;
+      max-width: 1100px;
+      margin: auto;
+    }
+    section {
+      margin-bottom: 3rem;
+      padding: 1.5rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.3);
+      transition: transform .3s ease;
+    }
+    section:hover { transform: translateY(-4px); }
+    h2 { color: #00ffe7; margin-bottom: 1rem; }
+    textarea, input, select {
+      width: 100%;
+      padding: .8rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+      font-family: monospace;
+    }
+    button {
+      padding: .8rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      background: #00bcd4;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background .3s, transform .2s;
+      margin-right: .5rem;
+    }
+    button:hover { background: #0097a7; transform: scale(1.05); }
+    .history-item {
+      background: rgba(255,255,255,0.07);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: .8rem;
+      font-size: .9rem;
+    }
+    .faq {
+      margin-top: 2rem;
+    }
+    .faq-item {
+      margin-bottom: 1rem;
+      cursor: pointer;
+    }
+    .faq-question {
+      font-weight: bold;
+      color: #00ffc8;
+    }
+    .faq-answer {
+      display: none;
+      margin-top: .4rem;
+      color: #ddd;
+    }
+    .tutorial-step {
+      display: none;
+      background: rgba(0,0,0,0.7);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: .9rem;
+      background: rgba(0,0,0,0.3);
+      color: #aaa;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="hero" id="hero">
-      <div class="illus">
-        <div class="logo">CB</div>
-        <div>
-          <h1>Callback • GrowA Callback</h1>
-          <p class="lead">Halaman callback modern — mendukung webhook, validasi, preview payload, dan simulasi panggilan. Siap integrasi ke serverless.</p>
-        </div>
-      </div>
+  <header>
+    <h1>Ultimate Callback & Webhook Playground</h1>
+    <p>Test, simulate, learn, and follow guided tutorials about callbacks and webhooks with animations and examples.</p>
+  </header>
+  <main>
+    <section>
+      <h2>Callback Sender</h2>
+      <label>Callback Endpoint URL</label>
+      <input id="endpoint" type="url" placeholder="https://example.com/webhook" />
+      <label>Method</label>
+      <select id="method">
+        <option>POST</option>
+        <option>PUT</option>
+        <option>PATCH</option>
+      </select>
+      <label>Headers (JSON format)</label>
+      <textarea id="headers">{"Content-Type":"application/json"}</textarea>
+      <label>Payload (JSON)</label>
+      <textarea id="payload">{"event":"test","message":"Hello Callback!"}</textarea>
+      <button onclick="sendCallback()">Send Callback</button>
+      <button onclick="simulateCallback()">Simulate (No Request)</button>
+      <button onclick="startTutorial()">Start Tutorial</button>
+      <pre id="response"></pre>
+    </section><section>
+  <h2>Request History</h2>
+  <div id="history"></div>
+</section>
 
-      <div class="features" aria-hidden>
-        <div class="f"><span>🚀</span><div><b>Animasi Halus</b><div>GSAP + CSS untuk transisi</div></div></div>
-        <div class="f"><span>🔒</span><div><b>Keamanan</b><div>Rate-limiter & sanitasi payload</div></div></div>
-        <div class="f"><span>⚙️</span><div><b>Preview</b><div>Lihat payload sebelum kirim</div></div></div>
-        <div class="f"><span>📈</span><div><b>Logs</b><div>Riwayat 20 callback terakhir (client-side)</div></div></div>
-      </div>
+<section>
+  <h2>Information Center</h2>
+  <ul>
+    <li><b>Callback:</b> Data sent back after an event occurs.</li>
+    <li><b>Webhook:</b> An automated callback triggered by API events.</li>
+    <li><b>Supported Methods:</b> POST, PUT, PATCH.</li>
+    <li><b>Headers:</b> Metadata such as Content-Type, Authorization.</li>
+    <li><b>Payload:</b> JSON with event details.</li>
+  </ul>
+</section>
 
-      <hr style="margin:20px 0;border:0;border-top:1px dashed rgba(255,255,255,0.03)" />
-
-      <div style="display:flex;gap:12px;align-items:center;justify-content:space-between">
-        <div>
-          <div class="note">Dibuat untuk integrasi mudah — copy endpoint dan tempel di sistem Anda.</div>
-          <div class="note" style="margin-top:6px">Dokumentasi & README disertakan di bawah.</div>
-        </div>
-        <div class="status" id="status">Status: <strong id="statusText">Ready</strong></div>
-      </div>
-    </div>
-
-    <div class="card" id="card">
-      <form id="cbForm" autocomplete="off">
-        <div>
-          <label for="endpoint">Callback Endpoint (URL)</label>
-          <input id="endpoint" type="url" placeholder="https://example.com/webhook" required />
-        </div>
-
-        <div>
-          <label for="method">HTTP Method</label>
-          <select id="method" required>
-            <option value="POST">POST</option>
-            <option value="PUT">PUT</option>
-          </select>
-        </div>
-
-        <div>
-          <label for="payload">Payload (JSON)</label>
-          <textarea id="payload" rows="6" placeholder='{"event":"order.created","data":{}}'></textarea>
-        </div>
-
-        <div class="row">
-          <button class="btn" id="sendBtn" type="submit">Kirim Callback</button>
-          <button class="btn" id="simulateBtn" type="button">Simulasi Lokal</button>
-        </div>
-
-        <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
-          <label style="margin:0"><input id="autoHeaders" type="checkbox" checked /> Tambah header X-Signature</label>
-          <div style="flex:1"></div>
-          <button type="button" id="clearBtn" class="btn" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)">Bersihkan</button>
-        </div>
-
-        <div style="margin-top:12px">
-          <label>Preview</label>
-          <pre id="preview" style="max-height:180px;overflow:auto;padding:12px;border-radius:10px;background:#061323;font-size:13px;color:#dbeafe"></pre>
-        </div>
-
-      </form>
-
-      <div style="margin-top:14px">
-        <label>Riwayat (Client-side)</label>
-        <div id="history" style="max-height:160px;overflow:auto;padding:10px;border-radius:10px;background:rgba(255,255,255,0.02)"></div>
-      </div>
-    </div>
+<section class="faq">
+  <h2>FAQ / Questions & Answers</h2>
+  <div class="faq-item">
+    <div class="faq-question">How do I use this tool?</div>
+    <div class="faq-answer">Fill in endpoint, method, headers, and payload. Click send. Check response below.</div>
   </div>
+  <div class="faq-item">
+    <div class="faq-question">Can I test without a server?</div>
+    <div class="faq-answer">Yes. Use the simulate button to preview payload without sending any request.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-question">Is my data stored?</div>
+    <div class="faq-answer">Only locally in your browser’s localStorage, not on any external server.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-question">Can I send files?</div>
+    <div class="faq-answer">This demo focuses on JSON payloads. For files, use multipart/form-data and adjust code accordingly.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-question">What about authentication?</div>
+    <div class="faq-answer">Add headers like Authorization: Bearer &lt;token&gt; in the headers section.</div>
+  </div>
+</section>
 
-  <div id="toast" class="toast" style="display:none">Terkirim!</div>
+<section>
+  <h2>Examples</h2>
+  <pre>{"event":"user_signup","user":{"id":123,"name":"Alice","email":"alice@example.com"}}</pre>
+  <pre>{"event":"order_created","order":{"id":"A001","total":59.99,"currency":"USD"}}</pre>
+  <pre>{"event":"payment_failed","reason":"Insufficient Funds"}</pre>
+</section>
 
+<section id="tutorial-section">
+  <h2>Interactive Tutorial</h2>
+  <div id="tutorial-step1" class="tutorial-step">Step 1: Enter your endpoint URL in the input box.</div>
+  <div id="tutorial-step2" class="tutorial-step">Step 2: Choose HTTP method (POST is most common).</div>
+  <div id="tutorial-step3" class="tutorial-step">Step 3: Edit headers if needed (JSON format).</div>
+  <div id="tutorial-step4" class="tutorial-step">Step 4: Edit payload (JSON) or leave default.</div>
+  <div id="tutorial-step5" class="tutorial-step">Step 5: Click “Send Callback” to send. Observe response.</div>
+  <div id="tutorial-step6" class="tutorial-step">Step 6: Check the history section to review what you sent.</div>
+  <div id="tutorial-step7" class="tutorial-step">Tutorial finished! You can restart anytime.</div>
+  <button onclick="nextTutorial()">Next Step</button>
+</section>
+
+  </main>
+  <footer>
+    <p>Ultimate Callback Playground — Interactive guide, examples, and learning hub. No external data stored.</p>
+  </footer>
   <script>
-    // --- Helper kecil
-    const $ = (id)=>document.getElementById(id);
-    const endpoint = $('endpoint');
-    const payload = $('payload');
-    const method = $('method');
-    const preview = $('preview');
-    const sendBtn = $('sendBtn');
-    const simulateBtn = $('simulateBtn');
-    const historyEl = $('history');
-    const statusText = $('statusText');
-    const autoHeaders = $('autoHeaders');
-
-    // inisialisasi contoh payload
-    payload.value = JSON.stringify({event:'order.created',data:{id:12345,amount:25000}},null,2);
-    preview.textContent = payload.value;
-
-    // preview live
-    payload.addEventListener('input', ()=>{
-      let v = payload.value.trim();
-      try{ const parsed = JSON.parse(v); preview.textContent = JSON.stringify(parsed,null,2)}catch(e){preview.textContent = v}
-    })
-
-    // simpan riwayat ke localStorage
-    function pushHistory(item){
-      const arr = JSON.parse(localStorage.getItem('cb_history_v1')||'[]');
-      arr.unshift(item);
-      if(arr.length>20) arr.pop();
-      localStorage.setItem('cb_history_v1',JSON.stringify(arr));
-      renderHistory();
+    let tutorialStep=0;
+    function sendCallback(){
+      const endpoint=document.getElementById('endpoint').value;
+      const method=document.getElementById('method').value;
+      let headers={};
+      try{headers=JSON.parse(document.getElementById('headers').value);}catch(e){alert('Invalid headers JSON');return;}
+      let payload={};
+      try{payload=JSON.parse(document.getElementById('payload').value);}catch(e){alert('Invalid payload JSON');return;}
+      fetch(endpoint,{method:method,headers:headers,body:JSON.stringify(payload)})
+      .then(res=>res.text())
+      .then(txt=>{
+        document.getElementById('response').textContent='Response: '+txt;
+        addHistory(method,endpoint,headers,payload,txt);
+      }).catch(err=>{
+        document.getElementById('response').textContent='Error: '+err;
+      });
     }
-    function renderHistory(){
-      const arr = JSON.parse(localStorage.getItem('cb_history_v1')||'[]');
-      historyEl.innerHTML = arr.map(h=>`<div style="padding:8px;border-bottom:1px dashed rgba(255,255,255,0.02)"><b>${h.url}</b><div style="font-size:12px;color:var(--muted)">${h.method} • ${new Date(h.at).toLocaleString()}</div></div>`).join('')
+    function simulateCallback(){
+      const method=document.getElementById('method').value;
+      const endpoint=document.getElementById('endpoint').value;
+      let headers={},payload={};
+      try{headers=JSON.parse(document.getElementById('headers').value);}catch(e){}
+      try{payload=JSON.parse(document.getElementById('payload').value);}catch(e){}
+      const result={status:'simulated',method,endpoint,headers,payload};
+      document.getElementById('response').textContent=JSON.stringify(result,null,2);
+      addHistory(method,endpoint,headers,payload,'SIMULATION');
     }
-    renderHistory();
-
-    // validasi sederhana & sanitasi
-    function safeJSON(text){
-      try{ return JSON.parse(text)}catch(e){return null}
+    function addHistory(method,endpoint,headers,payload,response){
+      const div=document.createElement('div');
+      div.className='history-item';
+      div.textContent=`${new Date().toLocaleTimeString()} | ${method} ${endpoint} | Payload: ${JSON.stringify(payload)} | Response: ${response}`;
+      document.getElementById('history').prepend(div);
+      let arr=JSON.parse(localStorage.getItem('callbackHistory')||'[]');
+      arr.unshift({time:Date.now(),method,endpoint,headers,payload,response});
+      arr=arr.slice(0,20);
+      localStorage.setItem('callbackHistory',JSON.stringify(arr));
     }
-
-    // show toast
-    function toast(msg='Terkirim!'){
-      const t = $('toast'); t.textContent = msg; t.style.display = 'block';
-      gsap.fromTo(t,{y:40,opacity:0},{y:0,opacity:1,duration:0.4});
-      setTimeout(()=>gsap.to(t,{opacity:0,y:30,duration:0.4,onComplete:()=>t.style.display='none'}),2000);
+    function loadHistory(){
+      let arr=JSON.parse(localStorage.getItem('callbackHistory')||'[]');
+      arr.forEach(h=>{
+        const div=document.createElement('div');
+        div.className='history-item';
+        div.textContent=`${new Date(h.time).toLocaleTimeString()} | ${h.method} ${h.endpoint} | Payload: ${JSON.stringify(h.payload)} | Response: ${h.response}`;
+        document.getElementById('history').appendChild(div);
+      });
     }
-
-    // animasi awal menggunakan GSAP
-    gsap.from('#hero',{opacity:0,y:16,duration:0.6,stagger:0.08});
-    gsap.from('#card',{opacity:0,y:20,duration:0.6,delay:0.12});
-
-    // kirim callback
-    async function sendCallback(toUrl, methodType, body, extraHeaders={}){
-      statusText.textContent = 'Sending...';
-      try{
-        // tambahkan header signature kecil jika diminta
-        const headers = { 'Content-Type':'application/json', ...extraHeaders };
-        const res = await fetch(toUrl, {method:methodType, headers, body:JSON.stringify(body), mode:'cors'});
-        const text = await res.text();
-        const ok = res.ok;
-        pushHistory({url:toUrl,method:methodType,at:Date.now(),ok});
-        statusText.textContent = ok?('200 OK'):(res.status+' '+res.statusText);
-        toast(ok? 'Callback berhasil' : 'Callback gagal (cek console)');
-        console.log('response text',text);
-        return {ok,resText:text,status:res.status}
-      }catch(err){
-        console.error(err);
-        statusText.textContent = 'Network Error';
-        toast('Gagal: Network Error');
-        pushHistory({url:toUrl,method:methodType,at:Date.now(),ok:false});
-        return {ok:false,error:err}
-      }
+    function startTutorial(){
+      tutorialStep=0;
+      document.querySelectorAll('.tutorial-step').forEach(s=>s.style.display='none');
+      document.getElementById('tutorial-step1').style.display='block';
     }
-
-    // event submit form
-    $('cbForm').addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const url = endpoint.value.trim();
-      if(!url){ alert('Masukkan endpoint URL'); endpoint.focus(); return }
-      const body = safeJSON(payload.value) || payload.value;
-      // rate-limit client-side sederhana: disable tombol 2 detik
-      sendBtn.disabled = true; setTimeout(()=>sendBtn.disabled=false,2000);
-
-      // headers
-      const headers = {};
-      if(autoHeaders.checked){
-        // contoh signature sederhana (tidak produksi!)
-        const sig = btoa(JSON.stringify({ts:Date.now(),nonce:Math.random().toString(36).slice(2,10)}));
-        headers['X-Signature'] = sig;
-      }
-
-      // show animasi kirim
-      gsap.to(sendBtn,{scale:0.98,duration:0.06,yoyo:true,repeat:1});
-      const result = await sendCallback(url, method.value, body, headers);
-      // tampilkan response singkat di preview area jika ada
-      if(result && result.resText){
-        preview.textContent = typeof result.resText === 'string' ? result.resText : JSON.stringify(result.resText,null,2);
-      }
-    })
-
-    // simulasi lokal — tidak mengirim, hanya memperlihatkan bagaimana payload akan terlihat
-    simulateBtn.addEventListener('click', ()=>{
-      const body = safeJSON(payload.value) || payload.value;
-      const simulated = {url: endpoint.value || 'https://example.local/simulated', method:method.value, body};
-      pushHistory({url:simulated.url,method:simulated.method,at:Date.now(),ok:true});
-      preview.textContent = JSON.stringify(simulated,null,2);
-      toast('Simulasi siap — lihat preview');
-    })
-
-    // tombol clear
-    $('clearBtn').addEventListener('click', ()=>{ endpoint.value=''; payload.value=''; preview.textContent=''; statusText.textContent='Ready' })
-
-    // small accessibility: enter pada endpoint akan fokus ke payload
-    endpoint.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); payload.focus(); } })
-
-    // progressive enhancement: jika server menyediakan CORS dan menerima, maka kirim. Jika tidak (CORS blocked), user dapat gunakan server-proxy.
-
-    // safe note untuk developer: untuk produksi tambahkan:
-    // - HMAC signature server-side verification
-    // - Rate limiting dan replay protection di server
-    // - TLS (https) wajib
+    function nextTutorial(){
+      if(tutorialStep>=7){tutorialStep=0;}
+      document.querySelectorAll('.tutorial-step').forEach(s=>s.style.display='none');
+      tutorialStep++;
+      const step=document.getElementById('tutorial-step'+tutorialStep);
+      if(step) step.style.display='block';
+    }
+    loadHistory();
+    document.querySelectorAll('.faq-item').forEach(item=>{
+      item.addEventListener('click',()=>{
+        const ans=item.querySelector('.faq-answer');
+        ans.style.display=ans.style.display==='block'?'none':'block';
+      });
+    });
   </script>
 </body>
-  </html>
+</html>
